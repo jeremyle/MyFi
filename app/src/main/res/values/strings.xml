@@ -1,3 +1,9 @@
 <resources>
     <string name="app_name">MyFi</string>
+    <string name="tab_investing">Investing</string>
+    <string name="tab_retirement">Retirement</string>
+    <string name="buying_power">Buying power</string>
+    <string name="stocks_and_etfs">Stocks &amp; ETFs</string>
+    <string name="today_label">Today</string>
+    <string name="shares_format">%d shares</string>
 </resources>
