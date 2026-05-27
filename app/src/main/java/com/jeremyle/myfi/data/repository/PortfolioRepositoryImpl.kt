@@ -100,17 +100,14 @@ private fun ChartPeriod.toApiParams(): Triple<Long, Long, String> {
 
     return when (this) {
         ChartPeriod.ONE_DAY -> {
-            // Most-recent weekday trading session (9:30 AM – 4:00 PM ET)
-            val today = now.toLocalDate()
-            val tradingDay = when (today.dayOfWeek) {
-                DayOfWeek.SATURDAY -> today.minusDays(1)
-                DayOfWeek.SUNDAY   -> today.minusDays(2)
-                else               -> today
-            }
-            val open  = ZonedDateTime.of(tradingDay, LocalTime.of(9, 30), nyZone)
-            val close = ZonedDateTime.of(tradingDay, LocalTime.of(16, 0), nyZone)
-            val to    = minOf(now.toEpochSecond(), close.toEpochSecond())
-            Triple(open.toEpochSecond(), to, "5")
+            // Resolve to the most recent session that has (or had) data:
+            //   • during market hours  → from open to now  (live intraday)
+            //   • after market close   → from open to 4 PM (full session replay)
+            //   • before today's open  → previous trading day's full session
+            //   • weekend              → most recent Friday's full session
+            val (open, close) = latestTradingSession(now, nyZone)
+            val to = minOf(now.toEpochSecond(), close.toEpochSecond())
+            Triple(open.toEpochSecond(), to, "60")   // 1-hour candles
         }
 
         ChartPeriod.ONE_WEEK -> {
@@ -136,4 +133,40 @@ private fun ChartPeriod.toApiParams(): Triple<Long, Long, String> {
             Triple(now.minusDays(365).toEpochSecond(), now.toEpochSecond(), "D")
         }
     }
+}
+
+/**
+ * Returns the open/close timestamps of the most recent NYSE trading session.
+ *
+ * Rules:
+ *  1. Skip weekends back to Friday.
+ *  2. If [now] is before today's 9:30 AM open, step back one more trading day
+ *     (Monday → Friday, otherwise → previous calendar day which is always a weekday
+ *     because we already stripped weekends in step 1).
+ */
+private fun latestTradingSession(
+    now: ZonedDateTime,
+    nyZone: ZoneId,
+): Pair<ZonedDateTime, ZonedDateTime> {
+    var day = now.toLocalDate()
+
+    // 1. Normalise weekends → most recent Friday
+    day = when (day.dayOfWeek) {
+        DayOfWeek.SATURDAY -> day.minusDays(1)
+        DayOfWeek.SUNDAY   -> day.minusDays(2)
+        else               -> day
+    }
+
+    // 2. If the market hasn't opened yet on this day, use the previous trading day
+    val todayOpen = ZonedDateTime.of(day, LocalTime.of(9, 30), nyZone)
+    if (now.isBefore(todayOpen)) {
+        day = when (day.dayOfWeek) {
+            DayOfWeek.MONDAY -> day.minusDays(3)  // Monday pre-open → Friday
+            else             -> day.minusDays(1)  // weekday pre-open → previous weekday
+        }
+    }
+
+    val open  = ZonedDateTime.of(day, LocalTime.of(9, 30), nyZone)
+    val close = ZonedDateTime.of(day, LocalTime.of(16, 0),  nyZone)
+    return open to close
 }
