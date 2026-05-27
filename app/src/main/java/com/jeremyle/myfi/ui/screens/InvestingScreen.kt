@@ -106,7 +106,19 @@ private fun InvestingContent(
 @Composable
 private fun PortfolioHeader(uiState: InvestingUiState) {
     val currencyFormat = remember { NumberFormat.getCurrencyInstance(Locale.US) }
-    val isGain      = uiState.todayChange >= 0
+
+    // While chart is loading fall back to today's change from the quote endpoint;
+    // once chart data is available use the period's start→end delta.
+    val hasPeriodData = !uiState.isChartLoading && uiState.chartPoints.size >= 2
+    val displayChange    = if (hasPeriodData) uiState.periodChange    else uiState.todayChange
+    val displayChangePct = if (hasPeriodData) uiState.periodChangePercent else uiState.todayChangePercent
+    val periodLabel = if (!hasPeriodData || uiState.selectedPeriod == ChartPeriod.ONE_DAY) {
+        stringResource(R.string.today_label)
+    } else {
+        uiState.selectedPeriod.label
+    }
+
+    val isGain      = displayChange >= 0
     val changeSign  = if (isGain) "▲" else "▼"
     val changeColor = if (isGain) GainGreen else LossOrange
 
@@ -123,9 +135,9 @@ private fun PortfolioHeader(uiState: InvestingUiState) {
         )
         Spacer(modifier = Modifier.height(6.dp))
         Text(
-            text     = "$changeSign ${currencyFormat.format(abs(uiState.todayChange))} " +
-                "(${String.format("%.2f", abs(uiState.todayChangePercent))}%) " +
-                stringResource(R.string.today_label),
+            text     = "$changeSign ${currencyFormat.format(abs(displayChange))} " +
+                "(${String.format("%.2f", abs(displayChangePct))}%) " +
+                periodLabel,
             color    = changeColor,
             fontSize = FontSize.sm
         )

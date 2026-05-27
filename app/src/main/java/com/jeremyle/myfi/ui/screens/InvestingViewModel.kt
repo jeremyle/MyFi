@@ -29,7 +29,10 @@ data class InvestingUiState(
     val chartPoints: List<ChartPoint> = emptyList(),
     val selectedPeriod: ChartPeriod = ChartPeriod.ONE_DAY,
     val isChartLoading: Boolean = true,
-    val chartError: String? = null
+    val chartError: String? = null,
+    // Change for the currently selected period (derived from chart points)
+    val periodChange: Double = 0.0,
+    val periodChangePercent: Double = 0.0,
 )
 
 class InvestingViewModel(application: Application) : AndroidViewModel(application) {
@@ -83,11 +86,14 @@ class InvestingViewModel(application: Application) : AndroidViewModel(applicatio
 
                 chartResult.fold(
                     onSuccess = { points ->
+                        val (pChange, pChangePct) = periodChangeFrom(points)
                         _uiState.update {
                             it.copy(
-                                chartPoints    = points,
-                                isChartLoading = false,
-                                selectedPeriod = period
+                                chartPoints          = points,
+                                isChartLoading       = false,
+                                selectedPeriod       = period,
+                                periodChange         = pChange,
+                                periodChangePercent  = pChangePct,
                             )
                         }
                     },
@@ -99,6 +105,16 @@ class InvestingViewModel(application: Application) : AndroidViewModel(applicatio
         }
     }
 
+    /** Returns (absoluteChange, percentChange) for the given chart point series. */
+    private fun periodChangeFrom(points: List<ChartPoint>): Pair<Double, Double> {
+        if (points.size < 2) return 0.0 to 0.0
+        val start  = points.first().value
+        val end    = points.last().value
+        val change = end - start
+        val pct    = if (start != 0.0) (change / start) * 100.0 else 0.0
+        return change to pct
+    }
+
     fun onPeriodSelected(period: ChartPeriod) {
         if (period == _uiState.value.selectedPeriod) return
         _uiState.update { it.copy(isChartLoading = true, chartError = null, selectedPeriod = period) }
@@ -107,7 +123,15 @@ class InvestingViewModel(application: Application) : AndroidViewModel(applicatio
                 runCatching { repository.getPortfolioChart(period) }
                     .fold(
                         onSuccess = { points ->
-                            _uiState.update { it.copy(chartPoints = points, isChartLoading = false) }
+                            val (pChange, pChangePct) = periodChangeFrom(points)
+                            _uiState.update {
+                                it.copy(
+                                    chartPoints         = points,
+                                    isChartLoading      = false,
+                                    periodChange        = pChange,
+                                    periodChangePercent = pChangePct,
+                                )
+                            }
                         },
                         onFailure = { e ->
                             _uiState.update { it.copy(chartError = e.message, isChartLoading = false) }
