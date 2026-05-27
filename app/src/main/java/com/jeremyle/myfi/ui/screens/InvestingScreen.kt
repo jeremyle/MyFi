@@ -67,9 +67,13 @@ private fun InvestingContent(
 
         // Chart + period selector
         item {
+            val chartIsPositive = uiState.chartPoints.let { pts ->
+                if (pts.size >= 2) pts.last().value >= pts.first().value
+                else uiState.todayChange >= 0   // fallback while chart is loading
+            }
             PortfolioChartSection(
                 points           = uiState.chartPoints,
-                isPositive       = uiState.todayChange >= 0,
+                isPositive       = chartIsPositive,
                 selectedPeriod   = uiState.selectedPeriod,
                 isLoading        = uiState.isChartLoading,
                 onPeriodSelected = onPeriodSelected
