@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.jeremyle.myfi.data.repository.PortfolioRepositoryImpl
+import com.jeremyle.myfi.di.NetworkModule
 import com.jeremyle.myfi.domain.model.Stock
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -26,7 +27,10 @@ data class InvestingUiState(
 class InvestingViewModel(application: Application) : AndroidViewModel(application) {
 
     // TODO: Replace with Hilt-injected PortfolioRepository once DI is wired up
-    private val repository = PortfolioRepositoryImpl(application)
+    private val repository = PortfolioRepositoryImpl(
+        context = application,
+        api = NetworkModule.provideFinnhubApi()
+    )
 
     private val _uiState = MutableStateFlow(InvestingUiState())
     val uiState: StateFlow<InvestingUiState> = _uiState.asStateFlow()

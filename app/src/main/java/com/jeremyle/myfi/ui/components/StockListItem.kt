@@ -73,7 +73,7 @@ fun StockListItem(
     }
 }
 
-@Preview(showBackground = true, backgroundColor = 0xFF000000)
+@Preview(showBackground = true)
 @Composable
 private fun StockListItemGainPreview() {
     MyFiTheme {
@@ -81,7 +81,7 @@ private fun StockListItemGainPreview() {
     }
 }
 
-@Preview(showBackground = true, backgroundColor = 0xFF000000)
+@Preview(showBackground = true)
 @Composable
 private fun StockListItemLossPreview() {
     MyFiTheme {
