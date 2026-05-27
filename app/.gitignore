@@ -1,1 +1,4 @@
 /build
+
+# Private portfolio data
+/src/main/assets/portfolio.json
