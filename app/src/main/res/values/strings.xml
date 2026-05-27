@@ -5,5 +5,10 @@
     <string name="buying_power">Buying power</string>
     <string name="stocks_and_etfs">Stocks &amp; ETFs</string>
     <string name="today_label">Today</string>
+    <string name="period_label_1w">Past week</string>
+    <string name="period_label_1m">Past month</string>
+    <string name="period_label_3m">Past 3 months</string>
+    <string name="period_label_ytd">Year to date</string>
+    <string name="period_label_1y">Past year</string>
     <string name="shares_format">%d shares</string>
 </resources>

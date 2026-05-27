@@ -112,10 +112,14 @@ private fun PortfolioHeader(uiState: InvestingUiState) {
     val hasPeriodData = !uiState.isChartLoading && uiState.chartPoints.size >= 2
     val displayChange    = if (hasPeriodData) uiState.periodChange    else uiState.todayChange
     val displayChangePct = if (hasPeriodData) uiState.periodChangePercent else uiState.todayChangePercent
-    val periodLabel = if (!hasPeriodData || uiState.selectedPeriod == ChartPeriod.ONE_DAY) {
-        stringResource(R.string.today_label)
-    } else {
-        uiState.selectedPeriod.label
+    val periodLabel = when {
+        !hasPeriodData || uiState.selectedPeriod == ChartPeriod.ONE_DAY -> stringResource(R.string.today_label)
+        uiState.selectedPeriod == ChartPeriod.ONE_WEEK                  -> stringResource(R.string.period_label_1w)
+        uiState.selectedPeriod == ChartPeriod.ONE_MONTH                 -> stringResource(R.string.period_label_1m)
+        uiState.selectedPeriod == ChartPeriod.THREE_MONTHS              -> stringResource(R.string.period_label_3m)
+        uiState.selectedPeriod == ChartPeriod.YTD                       -> stringResource(R.string.period_label_ytd)
+        uiState.selectedPeriod == ChartPeriod.ONE_YEAR                  -> stringResource(R.string.period_label_1y)
+        else                                                             -> uiState.selectedPeriod.label
     }
 
     val isGain      = displayChange >= 0
@@ -135,11 +139,12 @@ private fun PortfolioHeader(uiState: InvestingUiState) {
         )
         Spacer(modifier = Modifier.height(6.dp))
         Text(
-            text     = "$changeSign ${currencyFormat.format(abs(displayChange))} " +
+            text       = "$changeSign ${currencyFormat.format(abs(displayChange))} " +
                 "(${String.format("%.2f", abs(displayChangePct))}%) " +
                 periodLabel,
-            color    = changeColor,
-            fontSize = FontSize.sm
+            color      = changeColor,
+            fontSize   = FontSize.sm,
+            fontWeight = FontWeight.Bold
         )
     }
 }
