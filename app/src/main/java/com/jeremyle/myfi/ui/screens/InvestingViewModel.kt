@@ -36,8 +36,9 @@ class InvestingViewModel(application: Application) : AndroidViewModel(applicatio
 
     // TODO: Replace with Hilt-injected PortfolioRepository once DI is wired up
     private val repository = PortfolioRepositoryImpl(
-        context = application,
-        api     = NetworkModule.provideFinnhubApi()
+        context    = application,
+        finnhubApi = NetworkModule.provideFinnhubApi(),
+        yahooApi   = NetworkModule.provideYahooFinanceApi(),
     )
 
     private val _uiState = MutableStateFlow(InvestingUiState())
