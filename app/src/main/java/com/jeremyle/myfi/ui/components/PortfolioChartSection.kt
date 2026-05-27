@@ -194,10 +194,9 @@ private fun PeriodSelector(
                 label = period.label,
                 isSelected = period == selectedPeriod,
                 onClick = { onPeriodSelected(period) },
+                modifier = Modifier.weight(1f),
             )
         }
-
-        Spacer(modifier = Modifier.weight(1f))
 
         // Gear symbol — placeholder for future chart-settings bottom sheet
         Text(
@@ -213,9 +212,10 @@ private fun PeriodChip(
     label: String,
     isSelected: Boolean,
     onClick: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     Box(
-        modifier = Modifier
+        modifier = modifier
             .clickable(onClick = onClick)
             .background(
                 color = if (isSelected) GainGreen else Color.Transparent,
