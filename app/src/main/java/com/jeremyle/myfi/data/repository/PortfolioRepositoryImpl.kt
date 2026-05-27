@@ -104,7 +104,7 @@ class PortfolioRepositoryImpl(
  * GET /v8/finance/chart/{symbol}?interval=...&range=... endpoint.
  */
 private fun ChartPeriod.toYahooParams(): Pair<String, String> = when (this) {
-    ChartPeriod.ONE_DAY      -> "1h"  to "1d"
+    ChartPeriod.ONE_DAY      -> "5m"  to "1d"
     ChartPeriod.ONE_WEEK     -> "1h"  to "5d"
     ChartPeriod.ONE_MONTH    -> "1d"  to "1mo"
     ChartPeriod.THREE_MONTHS -> "1d"  to "3mo"
